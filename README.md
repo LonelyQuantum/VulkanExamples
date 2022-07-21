@@ -1,2 +1,2 @@
 # VulkanExamples
-Personal Vulkan exmaples collection
+Personal Vulkan examples collection

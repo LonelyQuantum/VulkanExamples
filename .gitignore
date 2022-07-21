@@ -1,0 +1,9 @@
+# built project and compiled shaders
+build/*
+assets/models/*
+assets/textures/*
+*.spv
+
+
+# Mac OS
+.DS_Store

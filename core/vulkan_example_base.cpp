@@ -6,11 +6,37 @@
 #include <set>
 #include <algorithm>
 #include <stdexcept>
+#include <memory>
 
 namespace PVulkanExamples
 {
 	void ExampleBase::init()
 	{
+        
+        setup();
+		createInstance();
+		createDebugMessenger();
+		createSurface();
+		createPhysicalDevice();
+		createLogicalDevice();
+		initializeCommandPools();
+		initializeCommandBuffers();
+		createDescriptorPools();
+		createSyncObjects();
+	}
+
+    void ExampleBase::cleanup()
+    {
+        vkDestroyDevice(m_device, m_defaultAllocator);
+        vkDestroySurfaceKHR(m_instance, m_surface, m_defaultAllocator);
+        VulkanUtil::destroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, m_defaultAllocator);
+        vkDestroyInstance(m_instance, m_defaultAllocator);
+    }
+
+    void ExampleBase::setup()
+    {
+        m_debugMode = false;
+
         //Window settings
         m_windowWidth = 800;
         m_windowHeight = 600;
@@ -40,7 +66,6 @@ namespace PVulkanExamples
         {
             m_instanceExtensions.push_back(glfwExtensions[extId]);
         }
-
         // Debug extension
         if (m_enableValidationLayers)
         {
@@ -49,10 +74,12 @@ namespace PVulkanExamples
 
         // Device extensions and physical device features
         addDeviceExtension(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-        VkPhysicalDeviceAccelerationStructureFeaturesKHR accelFeature{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR };
-        addDeviceExtension(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME, &accelFeature, { "accelerationStructure" });
-        VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtPipelineFeature{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR };
-        addDeviceExtension(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME, &rtPipelineFeature, { "rayTracingPipeline" });  // To use vkCmdTraceRaysKHR
+
+        // Raytracing extensions and features
+        
+        //auto accelFeature = std::make_shared<VkPhysicalDeviceAccelerationStructureFeaturesKHR>();
+        addDeviceExtension(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME, &m_accelFeature, {"accelerationStructure"});
+        addDeviceExtension(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME, &m_rtPipelineFeature, { "rayTracingPipeline" });
         addDeviceExtension(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);  // Required by ray tracing pipeline
         addPhysicalDeviceFeatureRequirement(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, "samplerAnisotropy");
         addPhysicalDeviceFeatureRequirement(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, "fragmentStoresAndAtomics");  // support inefficient readback storage buffer
@@ -70,28 +97,10 @@ namespace PVulkanExamples
         m_maxVertexBlendingMeshCount = 256;
         m_maxMaterialCount = 256;
 
-		createInstance();
-		createDebugMessenger();
-		createSurface();
-		createPhysicalDevice();
-		createLogicalDevice();
-		initializeCommandPools();
-		initializeCommandBuffers();
-		createDescriptorPools();
-		createSyncObjects();
-	}
-
-    void ExampleBase::cleanup()
-    {
-        vkDestroyDevice(m_device, m_defaultAllocator);
-        vkDestroySurfaceKHR(m_instance, m_surface, m_defaultAllocator);
-        VulkanUtil::destroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, m_defaultAllocator);
-        vkDestroyInstance(m_instance, m_defaultAllocator);
-    }
-
-    void ExampleBase::setup()
-    {
-        //TODO:fix setup
+        if (m_debugMode)
+        {
+            VulkanUtil::printVkPhysicalDeviceFeatureStructChain(&m_physicalFeaturesStructChain);
+        }
     }
 
 	void ExampleBase::createInstance()
@@ -122,7 +131,7 @@ namespace PVulkanExamples
         {
             instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(m_instanceLayers.size());
             instanceCreateInfo.ppEnabledLayerNames = m_instanceLayers.data();
-            VulkanUtil::populateDebugMessengerCreateInfo(debugCreateInfo, VulkanUtil::plainDebugCallback);
+            VulkanUtil::populateDebugMessengerCreateInfo(debugCreateInfo, VulkanUtil::plainDebugCallback, m_debugMode);
             instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
         }
         else
@@ -143,7 +152,7 @@ namespace PVulkanExamples
         if (m_enableValidationLayers)
         {
             VkDebugUtilsMessengerCreateInfoEXT createInfo;
-            VulkanUtil::populateDebugMessengerCreateInfo(createInfo, VulkanUtil::plainDebugCallback);
+            VulkanUtil::populateDebugMessengerCreateInfo(createInfo, VulkanUtil::plainDebugCallback, m_debugMode);
             if (VK_SUCCESS != VulkanUtil::createDebugUtilsMessengerEXT(m_instance, &createInfo, m_defaultAllocator, &m_debugMessenger))
             {
                 throw std::runtime_error("failed to set up debug messenger!");
@@ -245,6 +254,11 @@ namespace PVulkanExamples
         setObjectName(m_transferQueue, "Transfer Queue");
         vkGetDeviceQueue(m_device, m_queueFamilyIndices.presentFamily.value(), 0, &m_presentQueue);
         setObjectName(m_presentQueue, "Present Queue");
+
+        if (m_debugMode)
+        {
+            VulkanUtil::printVkPhysicalDeviceFeatureStructChain(&m_physicalFeaturesStructChain);
+        }
 	}
 
 	void ExampleBase::initializeCommandPools()

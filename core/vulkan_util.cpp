@@ -1,9 +1,74 @@
 #include "vulkan_util.h"
+#include "vulkan_reflection_util.h"
 
 #include <iostream>
+#include <iomanip>
 
 namespace PVulkanExamples
 {
+    std::map<std::string, int> VulkanUtil::valuePrintColNum{
+           { "VkPhysicalDeviceFeatures2", 4 }, { "VkPhysicalDeviceVulkan11Features", 4 }, { "VkPhysicalDeviceVulkan12Features", 3 },
+           { "VkPhysicalDeviceAccelerationStructureFeaturesKHR", 3 }
+    };
+
+    std::map<std::string, int> VulkanUtil::valuePrintAlignment{
+        { "VkPhysicalDeviceFeatures2", 45 }, { "VkPhysicalDeviceVulkan11Features", 45 }, { "VkPhysicalDeviceVulkan12Features", 60 },
+        { "VkPhysicalDeviceAccelerationStructureFeaturesKHR", 45 }
+    };
+
+
+    /*
+    * Helper function to print VkPhysicalDeviceFeatures struct
+    */
+    void VulkanUtil::printVkPhysicalDeviceFeatures(VkPhysicalDeviceFeatures features, int colNum) {
+        std::vector<VkBool32>  featureValues = VulkanReflectionUtil::getVkBool32StructValues(features);
+        std::cout << "\n=============================Print VkPhysicalDeviceFeatures=============================";
+        for (int i = 0; i < featureValues.size(); i++) {
+            if (i % colNum == 0) std::cout << "\n";
+            std::cout << std::setw(45) << std::left << std::string(VulkanReflectionUtil::physicalDeviceFeatures2Vector[i]) + ": " + std::to_string(featureValues[i]);
+        }
+        std::cout << std::endl;
+    }
+
+    /*
+    * Helper function to print VkPhysicalDeviceFeatures struct
+    */
+    void VulkanUtil::printVkPhysicalDeviceFeatures(void* features, int colNumInput) {
+        std::string featureStructName = VulkanReflectionUtil::getVkBool32StructName(features);
+        std::vector<const char*> featureStructMemberNames = VulkanReflectionUtil::getVkBool32StructVector(features);
+        if (!featureStructMemberNames.empty()) {
+            std::vector<VkBool32>  featureValues = VulkanReflectionUtil::getVkBool32StructValues(features);
+            std::cout << "\n=============================Print " + featureStructName + "============================ = ";
+            int colNum = colNumInput;
+            if (valuePrintColNum.find(featureStructName) != valuePrintColNum.end()) {
+                colNum = valuePrintColNum[featureStructName];
+            }
+            int alignment = alignmentDefault;
+            if (valuePrintAlignment.find(featureStructName) != valuePrintAlignment.end()) {
+                alignment = valuePrintAlignment[featureStructName];
+            }
+            for (int i = 0; i < featureValues.size(); i++) {
+                if (i % colNum == 0) std::cout << "\n";
+                std::cout << std::setw(alignment) << std::left << std::string(featureStructMemberNames[i]) + ": " + std::to_string(featureValues[i]);
+            }
+            std::cout << std::endl;
+        }
+        else std::cout << "\nPrint not support for this feature structure: " << featureStructName << std::endl;
+    }
+
+    /*
+    * Helper function to print VkPhysicalDeviceFeatures struct
+    */
+    void VulkanUtil::printVkPhysicalDeviceFeatureStructChain(void* structFeatures, int colNum) {
+        VulkanStructCommon* features = reinterpret_cast<VulkanStructCommon*>(structFeatures);
+        while (features != nullptr) {
+            printVkPhysicalDeviceFeatures(features);
+            features = (VulkanStructCommon*)features->pNext;
+        }
+    }
+
+
+
     /*
     * Populate debug messenger according to whether it is debug mode
     */

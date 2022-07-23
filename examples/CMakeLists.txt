@@ -39,8 +39,8 @@ function(buildExample EXAMPLE_NAME)
     file(GLOB SHADERS_GLSL_SPV "${SHADER_DIR_GLSL}/*.spv")
     file(GLOB SHADERS_HLSL_SPV "${SHADERS_DIR_HLSL}/*.spv")
     install(TARGETS ${EXAMPLE_NAME} DESTINATION "examples")
-    install(FILES ${SHADERS_GLSL_SPV} DESTINATION "assets/shaders/glsl/${EXAMPLE_NAME}")
-    install(FILES ${SHADERS_HLSL_SPV} DESTINATION "assets/shaders/hlsl/${EXAMPLE_NAME}")
+    install(FILES ${SHADERS_GLSL_SPV} DESTINATION "assets/shaders/glsl")
+    install(FILES ${SHADERS_HLSL_SPV} DESTINATION "assets/shaders/hlsl")
 endfunction(buildExample)
 
 # Build all examples

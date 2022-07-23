@@ -13,5 +13,7 @@ namespace PVulkanExamples
 int main()
 {
 	PVulkanExamples::TriangleExample example;
+	example.init();
+	example.cleanup();
 	return 0;
 }

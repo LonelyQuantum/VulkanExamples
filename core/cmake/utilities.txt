@@ -1,0 +1,7 @@
+# ---- Print cmake LIST ----
+function(print_list LIST)
+  message("\nPrint List " ${LIST})
+  foreach(LIST_ITEM ${${LIST}})
+    message(${LIST_ITEM})
+  endforeach()
+endfunction(print_list)

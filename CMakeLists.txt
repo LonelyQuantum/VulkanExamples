@@ -28,14 +28,16 @@ endif()
 
 # ---- Set exe files ---
 if(WIN32)
-  set(glslangValidator_exe ${CMAKE_SOURCE_DIR}/3rdparty/VulkanSDK/bin/Win32/glslangValidator.exe)
-  set(glslc_exe ${CMAKE_SOURCE_DIR}/3rdparty/VulkanSDK/bin/Win32/glslc.exe) 
+  set(GLSLANGVALIDATOR ${CMAKE_SOURCE_DIR}/3rdparty/vulkan/bin/Win32/glslangValidator.exe)
+  set(GLSLC ${CMAKE_SOURCE_DIR}/3rdparty/vulkan/bin/Win32/glslc.exe) 
 endif(WIN32)
 
 # ---- Setup configure header ----
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/")
 configure_file(configFile.h.in configFile.h)
 install(FILES "${PROJECT_BINARY_DIR}/configFile.h" DESTINATION "include")
+
+set(EXAMPLE_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(3rdparty)
 add_subdirectory(core)

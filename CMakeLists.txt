@@ -35,6 +35,7 @@ endif(WIN32)
 # ---- Setup configure header ----
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/")
 configure_file(configFile.h.in configFile.h)
+install(FILES "${PROJECT_BINARY_DIR}/configFile.h" DESTINATION "include")
 
 add_subdirectory(3rdparty)
 add_subdirectory(core)

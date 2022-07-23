@@ -20,9 +20,18 @@ function(buildExample EXAMPLE_NAME)
 	source_group("shaders/hlsl" FILES ${SHADERS_HLSL})
 
     file(GLOB README_FILES "${EXAMPLE_FOLDER}/*.md") # readme.md
+
+    # Add target
     add_executable(${EXAMPLE_NAME} ${SOURCES} ${HEADERS} ${SHADERS_GLSL} ${SHADERS_HLSL} ${README_FILES})
     target_link_libraries(${EXAMPLE_NAME} core)
     set_target_properties(${EXAMPLE_NAME} PROPERTIES FOLDER ${examples_folder})
+
+    # Installation settings
+    file(GLOB SHADERS_GLSL_SPV "${SHADER_DIR_GLSL}/*.spv")
+    file(GLOB SHADERS_HLSL_SPV "${SHADERS_DIR_HLSL}/*.spv")
+    install(TARGETS ${EXAMPLE_NAME} DESTINATION "examples")
+    install(FILES ${SHADERS_GLSL_SPV} DESTINATION "assets/shaders/glsl/${EXAMPLE_NAME}")
+    install(FILES ${SHADERS_HLSL_SPV} DESTINATION "assets/shaders/hlsl/${EXAMPLE_NAME}")
 endfunction(buildExample)
 
 # Build all examples

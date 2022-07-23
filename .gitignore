@@ -1,5 +1,6 @@
-# built project and compiled shaders
+# built project, installed files and compiled shaders
 build/*
+install/*
 assets/models/*
 assets/textures/*
 *.spv
